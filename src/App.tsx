@@ -27,10 +27,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     setIsLoading(true);
     getTodos()
-      .then(fetchedTodos => {
-        setTodos(fetchedTodos);
-        setError('');
-      })
+      .then(setTodos)
       .catch(() => setError('load'))
       .finally(() => setIsLoading(false));
   }, []);
@@ -59,7 +56,19 @@ export const App: React.FC = () => {
   const displayTodos = tempTodo ? [...filteredTodos, tempTodo] : filteredTodos;
 
   const handleClearCompleted = () => {
-    setTodos(prev => prev.filter(todo => !todo.completed));
+    const completedTodos = todos.filter(todo => todo.completed);
+
+    Promise.all(
+      completedTodos.map(todo =>
+        deleteTodo(todo.id).then(() => {
+          setTodos(prev => prev.filter(t => t.id !== todo.id));
+        }),
+      ),
+    )
+      .catch(() => setError('delete'))
+      .finally(() => {
+        inputRef.current?.focus();
+      });
   };
 
   const handleQuery = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,6 +93,7 @@ export const App: React.FC = () => {
       userId: USER_ID,
     };
 
+    setIsLoading(true);
     setTempTodo(temp);
     setIsAdding(true);
     createTodo(trimmed)
@@ -95,6 +105,7 @@ export const App: React.FC = () => {
       })
       .catch(() => setError('add'))
       .finally(() => {
+        setIsLoading(false);
         setIsAdding(false);
         setTempTodo(null);
       });

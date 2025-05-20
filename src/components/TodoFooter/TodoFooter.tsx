@@ -1,5 +1,6 @@
 import { FilterStatus } from '../../types/FilterStatus';
 import { Todo } from '../../types/Todo';
+import classNames from 'classnames';
 
 type Props = {
   todos: Todo[];
@@ -34,7 +35,9 @@ export const TodoFooter: React.FC<Props> = ({
           <a
             key={filter}
             href={`#/${filter.toLowerCase()}`}
-            className={`filter__link ${currentFilter === filter ? 'selected' : ''}`}
+            className={classNames('filter__link', {
+              selected: currentFilter === filter,
+            })}
             data-cy={`FilterLink${filter}`}
             onClick={() => onFilterChange(filter)}
           >
@@ -44,16 +47,15 @@ export const TodoFooter: React.FC<Props> = ({
       </nav>
 
       {/* this button should be disabled if there are no completed todos */}
-      {completedCount > 0 && (
-        <button
-          type="button"
-          className="todoapp__clear-completed"
-          data-cy="ClearCompletedButton"
-          onClick={onClearCompleted}
-        >
-          Clear completed
-        </button>
-      )}
+      <button
+        type="button"
+        className="todoapp__clear-completed"
+        data-cy="ClearCompletedButton"
+        onClick={onClearCompleted}
+        disabled={completedCount === 0}
+      >
+        Clear completed
+      </button>
     </footer>
   );
 };
